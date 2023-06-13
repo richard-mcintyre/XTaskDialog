@@ -1,0 +1,50 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: Build and publish to nuget
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Pull source
+      uses: actions/checkout@v3
+
+    - name: Restore dependencies
+      run: dotnet restore XTaskDialog.sln
+
+    - name: Build XTaskDialog
+      run: dotnet build XTaskDialog.sln --no-restore
+         
+    - name: Bump build version
+      id: bump
+      uses: vers-one/dotnet-project-version-updater@v1.3
+      with:
+        file: |
+          "**/XTaskDialog.csproj"
+        version: bump-build
+
+    - name: Push version file changes
+      run: |
+        git config user.name "${{ github.actor }}"
+        git config user.email "richard-mcintyre@users.noreply.github.com"
+        git add .
+        git commit -m "Bump project version to ${{ steps.bump.outputs.newVersion }}"
+        git push
+                
+    - name: Create package
+      run: dotnet pack -o dist -c PackRelease XTaskDialog
+
+    - name: Upload package artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: packages.zip
+        path: dist
+
+    - name: Push package to nuget
+      run: dotnet nuget push "dist/*.nupkg" --api-key ${{secrets.NUGET_API_TOKEN}} --source https://api.nuget.org/v3/index.json
