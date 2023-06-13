@@ -1,7 +1,7 @@
 <Project>
 
     <PropertyGroup>
-		<TargetFrameworks>net7.0-windows</TargetFrameworks>
+		<TargetFrameworks>net7.0-windows;net6.0-windows</TargetFrameworks>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
@@ -21,6 +21,9 @@
 
 	<ItemGroup>
 		<None Include="..\README.md" Pack="true" PackagePath="\" Visible="false" />
+		<None Include="..\docs\simplemessage.png" Pack="true" PackagePath="\docs" Visible="false" />
+		<None Include="..\docs\advancedmessage.png" Pack="true" PackagePath="\docs" Visible="false" />
+		<None Include="..\docs\progressdlg.gif" Pack="true" PackagePath="\docs" Visible="false" />
 	</ItemGroup>
 
 </Project>

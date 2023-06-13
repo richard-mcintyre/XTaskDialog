@@ -163,6 +163,26 @@ namespace XTaskDialog
 
         #region Methods
 
+        public static void Show(Func<CancellationToken, IProgress<ProgressDialogProgressInfo>, Task> fnTask,
+                                        IntPtr hWndParent, string mainInstruction, string content)
+        {
+            using (CancellationTokenSource cts = new CancellationTokenSource())
+            {
+                ProgressDialogProgressInfo progressInfo = new ProgressDialogProgressInfo();
+
+                Task task = fnTask(cts.Token, new Progress<ProgressDialogProgressInfo>(p => progressInfo.SetFrom(p)));
+
+                Show(task, hWndParent, mainInstruction, content, cts, progressInfo);
+            }
+        }
+
+        public static void Show(Task task, IntPtr hWndParent, string mainInstruction, string content,
+                                CancellationTokenSource? cancellation, ProgressDialogProgressInfo? progress)
+        {
+            ProgressDialog dlg = new ProgressDialog(hWndParent, mainInstruction, content);
+            dlg.Show(task, cancellation, progress);
+        }
+
         public void Show(Task task, CancellationTokenSource? cancellation, ProgressDialogProgressInfo? progress)
         {
             if (task.IsCompleted)
@@ -172,6 +192,26 @@ namespace XTaskDialog
             }
 
             InternalShow(task, cancellation, progress);
+        }
+
+        public static T Show<T>(Func<CancellationToken, IProgress<ProgressDialogProgressInfo>, Task<T>> fnTask,
+                                        IntPtr hWndParent, string mainInstruction, string content)
+        {
+            using (CancellationTokenSource cts = new CancellationTokenSource())
+            {
+                ProgressDialogProgressInfo progressInfo = new ProgressDialogProgressInfo();
+
+                Task<T> task = fnTask(cts.Token, new Progress<ProgressDialogProgressInfo>(p => progressInfo.SetFrom(p)));
+
+                return Show(task, hWndParent, mainInstruction, content, cts, progressInfo);
+            }
+        }
+
+        public static T Show<T>(Task<T> task, IntPtr hWndParent, string mainInstruction, string content,
+                                CancellationTokenSource? cancellation, ProgressDialogProgressInfo? progress)
+        {
+            ProgressDialog dlg = new ProgressDialog(hWndParent, mainInstruction, content);
+            return dlg.Show(task, cancellation, progress);
         }
 
         public T Show<T>(Task<T> task, CancellationTokenSource? cancellation, ProgressDialogProgressInfo? progress)
